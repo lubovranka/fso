@@ -1,0 +1,6 @@
+title New note (SPA)
+
+note right of Browser: JS registers an onsubmit \nevent handler on the form \nwith event.preventDefault() \npreventing a GET request
+note right of Browser: New note pushed into \nnote array and redrawn
+Browser->Server: HTTP POST /exampleapp/new_note_spa
+note right of Browser: New note sent to server

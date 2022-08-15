@@ -1,0 +1,9 @@
+title New note
+
+note right of Browser: New note sent in \nthe request body 
+Browser->Server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/notes
+note left of Server: New note stored on server \nfrom the request body
+Server-->Browser: 302 REDIRECT
+Browser->Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/new_note
+Server->Browser: HTML
+note right of Browser: Browser fetches necessary \nfiles and runs JS
