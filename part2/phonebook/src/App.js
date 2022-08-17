@@ -3,6 +3,7 @@ import axios from "axios";
 import { Filter } from "./Components/Filter";
 import { Form } from "./Components/Form";
 import { Numbers } from "./Components/Numbers";
+import pbService from "./services/pbService";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -11,9 +12,9 @@ const App = () => {
   const [filter, setFilter] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((res) => {
-      setPersons(res.data);
-    });
+    pbService
+      .getAll()
+      .then(initialPeople => setPersons(initialPeople))
   }, []);
 
   const handleNewName = (e) => {
@@ -38,7 +39,14 @@ const App = () => {
     e.preventDefault();
 
     if (persons.some((person) => person.name === newName)) {
-      alert(`${newName} is already added to the phonebook`);
+      const [personToUpdate] = persons.filter(person => person.name === newName)
+      if (window.confirm(`${personToUpdate.name} is already added to the phonebook, replace old number with a new one?`)) {
+    
+        pbService.updateNumber(personToUpdate, newNumber)
+          .then(() => {
+            pbService.getAll().then(res => setPersons(res))
+          })
+      }
     } else if (persons.some((person) => person.number === newNumber)) {
       alert(`${newNumber} is already added to the phonebook`);
     } else {
@@ -46,9 +54,14 @@ const App = () => {
         name: newName,
         number: newNumber,
       };
-      setPersons(persons.concat(newPerson));
-      setNewName("");
-      setNewNumber("");
+
+      pbService.create(newPerson)
+        .then(res => {
+          setPersons(persons.concat(res))
+          setNewName("")
+          setNewNumber("")
+        })
+
     }
   };
 
@@ -59,7 +72,7 @@ const App = () => {
       <Form
         data={{ newNumber, handleNewNumber, newName, handleNewName, addPerson }}
       />
-      <Numbers peopleToShow={peopleToShow} />
+      <Numbers peopleToShow={peopleToShow} setPersons={(newPersons) => setPersons(newPersons)}/>
     </div>
   );
 };
