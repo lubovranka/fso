@@ -66,7 +66,7 @@ app.post("/api/persons", (request, response) => {
   if (!body.number) {
     response.status(400).json({ error: "must provide number" }).end()
   } else if (people.some(person => person.name === body.name)) {
-    response.json({ error: "name must be unique" }).status(400).end()
+    response.status(400).json({ error: "name must be unique" }).end()
   } else {
     response.json(people)
   }
