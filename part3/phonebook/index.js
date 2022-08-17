@@ -1,7 +1,13 @@
 const { response, request } = require('express')
 const express = require('express')
+var morgan = require('morgan')
 const app = express()
 
+
+morgan.token('body', function getBody(res) {
+  return JSON.stringify(res.body)
+})
+app.use(morgan(':method :url :status :http-version - :response-time ms :body'))
 app.use(express.json())
 
 let people = [
@@ -60,12 +66,14 @@ app.post("/api/persons", (request, response) => {
   if (!body.number) {
     response.status(400).json({ error: "must provide number" }).end()
   } else if (people.some(person => person.name === body.name)) {
-    response.status(400).json({ error: "name must be unique" }).end()
+    response.json({ error: "name must be unique" }).status(400).end()
+  } else {
+    response.json(people)
   }
 
   people.push({...body, id: Math.floor(Math.random() * 1000000)})
 
-  response.json(people)
+  
 })
 
 const PORT = 3001
