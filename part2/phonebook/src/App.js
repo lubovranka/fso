@@ -4,12 +4,14 @@ import { Filter } from "./Components/Filter";
 import { Form } from "./Components/Form";
 import { Numbers } from "./Components/Numbers";
 import pbService from "./services/pbService";
+import Notification from "./Components/Notification"
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
+  const [notification, setNotification] = useState({})
 
   useEffect(() => {
     pbService
@@ -35,6 +37,13 @@ const App = () => {
       )
     : persons;
 
+  const createNotification = (message, type) => {
+    setNotification({message, type})
+    setTimeout(() => {
+      setNotification(null)
+    }, 2000)
+  }
+
   const addPerson = (e) => {
     e.preventDefault();
 
@@ -46,8 +55,12 @@ const App = () => {
           .then(() => {
             pbService.getAll().then(res => setPersons(res))
           })
+          .catch((err) => {
+            console.log(err)
+            createNotification(`Information of ${personToUpdate.name} has already been removed from the server`, "error")
+          })
       }
-    } else if (persons.some((person) => person.number === newNumber)) {
+    } else if (persons.some((person) => person.name === newName)) {
       alert(`${newNumber} is already added to the phonebook`);
     } else {
       const newPerson = {
@@ -60,6 +73,7 @@ const App = () => {
           setPersons(persons.concat(res))
           setNewName("")
           setNewNumber("")
+          createNotification(`Added ${newPerson.name}`, "notification")
         })
 
     }
@@ -68,6 +82,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification data={notification}/>
       <Filter filter={filter} handleNewFilter={handleNewFilter} />
       <Form
         data={{ newNumber, handleNewNumber, newName, handleNewName, addPerson }}

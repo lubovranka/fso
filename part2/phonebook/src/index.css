@@ -1,0 +1,17 @@
+* {
+    box-sizing: border-box;
+}
+
+.notification {
+    border: 2px solid #1d7b18;
+    color: #1d7b18;
+    background-color: #d3d3d3;
+    padding: 0.5em;
+}
+
+.error {
+    border: 2px solid #fa191f;
+    color: #fa191f;
+    background-color: #d3d3d3;
+    padding: 0.5em;
+}
