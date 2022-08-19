@@ -21,15 +21,29 @@ const App = () => {
   };
 
   const handlePersonFieldSubmit = () => {
-    pbServices
-      .create(newPerson)
-      .then((res) => {
-        setPersons(persons.concat(res))
-        createNotification(`${newPerson.name} added to the phonebook`, "success")
-      })
-      .catch(err => {
-        createNotification(`${err.response.data.error}`, "error")
-      });
+    const [match] = persons.filter(person => person.name === newPerson.name)
+    if (match) {
+      if (window.confirm(`Update ${match.name}'s phone number?`)) {
+        pbServices
+          .update(newPerson, match.id)
+          .then(res => {
+            setPersons(res)
+            createNotification(`${newPerson.name} updated`, "success")
+          }).catch(err => {
+            createNotification(`${err.response.data.error}`, "error")
+          });
+      }
+    } else {
+      pbServices
+        .create(newPerson)
+        .then((res) => {
+          setPersons(res)
+          createNotification(`${newPerson.name} added to the phonebook`, "success")
+        })
+        .catch(err => {
+          createNotification(`${err.response.data.error}`, "error")
+        });
+    }
   };
 
   const handleDelete = (id) => {
