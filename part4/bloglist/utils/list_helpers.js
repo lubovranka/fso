@@ -12,7 +12,7 @@ const favoriteBlog = blogs => {
 
 const mostBlogs = blogs => {
     const authors = blogs.reduce((prev, cur) => {
-        if (prev.length && prev.some(author => author.author === cur.author)) {
+        if (prev.some(author => author.author === cur.author)) {
             return prev = prev.map(author => author.author === cur.author ? {...author, blogs: author.blogs += 1} : {...author})
         } else {
             return prev = [...prev, {author: cur.author, blogs: 1}]
@@ -25,7 +25,7 @@ const mostBlogs = blogs => {
 
 const mostLikes = blogs => {
     const authors = blogs.reduce((prev, cur) => {
-        if (prev.length && prev.some(author => author.author === cur.author)) {
+        if (prev.some(author => author.author === cur.author)) {
             return prev = prev.map(author => author.author === cur.author ? {...author, likes: author.likes += cur.likes} : {...author})
         } else {
             return prev = [...prev, {author: cur.author, likes: cur.likes}]
