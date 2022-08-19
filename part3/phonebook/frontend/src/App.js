@@ -24,7 +24,7 @@ const App = () => {
     pbServices
       .create(newPerson)
       .then((res) => {
-        setPersons(res)
+        setPersons(persons.concat(res))
         createNotification(`${newPerson.name} added to the phonebook`, "success")
       })
       .catch(err => {
