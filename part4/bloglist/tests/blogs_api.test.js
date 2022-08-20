@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 const api = supertest(app)
 
@@ -44,94 +45,244 @@ const blogs = [
     }  
 ]
 
+const users = [
+    {
+        username: "happyMonkey",
+        name: "Mark",
+        password: "happier"
+    }, 
+    {
+        username: "swimmyDolphin",
+        name: "Dolphinator",
+        password: "wetter"
+    }
+]
+
 beforeEach(async () => {
     await Blog.deleteMany({})
+    await User.deleteMany({})
 
     for (let blog of blogs) {
         let newBlog = new Blog(blog)
         await newBlog.save()
     }
-}, 100000)
+
+    for (let user of users) {
+        await api
+                .post('/api/users')
+                .send(user)
+                .expect(201)
+    }
+})
 
 describe('blogs api', () => {
-    test('fetch all blogs', async () => {
-        const res = await api.get('/api/blogs')
-        expect(res.body).toHaveLength(blogs.length)
-    }, 100000)
-
-    test('has id', async () => {
-        const res = await api.get('/api/blogs')
-        expect(res.body[0]).toHaveProperty('id')
+    it('can get all blogs', async () => {
+        const newBlogs = await api
+                        .get('/api/blogs')
+        expect(newBlogs.body.length).toBe(blogs.length)
     })
-    test('can post', async() => {
-        const newBlog = {title: "Some title", author: "Some guy", url: "some url", "likes": 7}
+    it('can get all users', async () => {
+        const newUsers = await api
+                        .get('/api/users')
+        expect(newUsers.body.length).toBe(users.length)
+    })
+    it('can create new user', async () => {
         await api
-            .post('/api/blogs')
-            .send(newBlog)
+            .post('/api/users')
+            .send({
+                "username": "happyMbfvonjjkeys",
+                "name": "Mark",
+                "password": "happier"
+            })
             .expect(201)
-            .expect('Content-Type', /application\/json/)
-
-        const res = (await api.get('/api/blogs')).body
-        expect(res).toHaveLength(blogs.length + 1)
-
-        const titles = res.map(blog => blog.title)
-        expect(titles).toContain('Some title')
     })
-    test('can post without likes', async () => {
-        const newBlog = {title: "0 likes", author: "Unpopular guy", url: "sad url"}
-
+    it('cant create duplicate user', async () => {
         await api
-            .post('/api/blogs')
-            .send(newBlog)
-            .expect(201)
-            .expect('Content-Type', /application\/json/)
-
-        const res = (await api.get('/api/blogs')).body
-        expect(res).toHaveLength(blogs.length + 1)
-
-        const titles = res.map(blog => blog.title)
-        expect(titles).toContain('0 likes')
-
-        const noLikes = res.find(blog => blog.title === "0 likes")
-        expect(noLikes.likes).toBe(0)
-    })
-    test('cant post without title and url', async () => {
-        const newBlog = {author: "Unpopular guy", likes: 2}
-
-        await api
-            .post('/api/blogs')
-            .send(newBlog)
+            .post('/api/users')
+            .send({
+                "username": "happyMonkey",
+                "name": "Mark",
+                "password": "happier"
+            })
             .expect(400)
     })
-    test('can delete blog', async () => {
-        const currentBlogs = (await api.get('/api/blogs')).body
-        const blogToDelete = currentBlogs[0]
-
+    it('cant create bad user', async () => {
         await api
-            .delete(`/api/blogs/${blogToDelete.id}`)
-            .expect(204)
-
-        const afterDelete = (await api.get('/api/blogs')).body
-        expect(afterDelete.length).toBe(currentBlogs.length - 1)
-
-        const newBlogs = afterDelete.map(blog => blog.title)
-        expect(newBlogs).not.toContain(blogToDelete.title)
+            .post('/api/users')
+            .send({
+                "username": "hen",
+                "name": "Mark",
+                "password": "tor"
+            })
+            .expect(400)
     })
-    test('can update blog', async () => {
-        const currentBlogs = (await api.get('/api/blogs')).body
-        const blogToUpdate = currentBlogs[0]
-        const updates = { likes: 222 }
+    it('can login user', async () => {
+        const res = await api
+                            .post('/api/login')
+                            .send({
+                                "username": "happyMonkey",
+                                "password": "happier"
+                            })
+                            .expect(200)
+        expect(res.body.token).toBeTruthy()
+    })
+    it('cant login wrong user', async () => {
+        const res = await api
+                            .post('/api/login')
+                            .send({
+                                "username": "happyMonkey",
+                                "password": "happiest"
+                            })
+                            .expect(401)
+        expect(res.body.token).toBeFalsy()
+    })
+    it('user can post', async () => {
+        const user = await api
+                            .post('/api/login')
+                            .send(users[0])
 
         await api
-            .put(`/api/blogs/${blogToUpdate.id}`)
-            .send(updates)
-            .expect(204)
-            
-        const afterUpdateBlogs = (await api.get('/api/blogs')).body
-        expect(afterUpdateBlogs.length).toBe(blogs.length)
-
-        const updatedBlog = afterUpdateBlogs[0]
-        expect(updatedBlog.likes).toBe(222)
+                .post('/api/blogs')
+                .set('authorization', `bearer ${user.body.token}`)
+                .send({
+                    "title": "user with bearer",
+                    "url": "someURL",
+                    "author": "me",
+                    "likes": 5
+                })
+                .expect(201)
+    })
+    it('non-user cant post', async () => {
+        await api
+                .post('/api/blogs')
+                .send({
+                    "title": "user with bearer",
+                    "url": "someURL",
+                    "author": "me",
+                    "likes": 5
+                })
+                .expect(401)
+    })
+    it('bad jwt cant post', async () => {
+        await api
+                .post('/api/blogs')
+                .set('authorization', 'bearer fdjdsfdhj')
+                .send({
+                    "title": "user with bearer",
+                    "url": "someURL",
+                    "author": "me",
+                    "likes": 5
+                })
+                .expect(400)
+    })
+    it('user can delete', async () => {
+        const user = await api
+                            .post('/api/login')
+                            .send(users[0])
+        const newBlog = await api
+                .post('/api/blogs')
+                .set('authorization', `bearer ${user.body.token}`)
+                .send({
+                    "title": "user with bearer",
+                    "url": "someURL",
+                    "author": "me",
+                    "likes": 5
+                })
+        await api
+                .delete(`/api/blogs/${newBlog.body.id}`)
+                .set('authorization', `bearer ${user.body.token}`)
+                .expect(204)
+    })
+    it('non-user cant delete', async () => {
+        const user = await api
+                            .post('/api/login')
+                            .send(users[0])
+        const newBlog = await api
+                .post('/api/blogs')
+                .set('authorization', `bearer ${user.body.token}`)
+                .send({
+                    "title": "user with bearer",
+                    "url": "someURL",
+                    "author": "me",
+                    "likes": 5
+                })
+        await api
+                .delete(`/api/blogs/${newBlog.body.id}`)
+                .expect(401)
+    })
+    it('bad jwt cant delete', async () => {
+        const user = await api
+                            .post('/api/login')
+                            .send(users[0])
+        const newBlog = await api
+                .post('/api/blogs')
+                .set('authorization', `bearer ${user.body.token}`)
+                .send({
+                    "title": "user with bearer",
+                    "url": "someURL",
+                    "author": "me",
+                    "likes": 5
+                })
+        await api
+                .delete(`/api/blogs/${newBlog.body.id}`)
+                .set('authorization', 'bearer dfjdjklas')
+                .expect(400)
+    })
+    it('user can update', async () => {
+        const user = await api
+                            .post('/api/login')
+                            .send(users[0])
+        const newBlog = await api
+                .post('/api/blogs')
+                .set('authorization', `bearer ${user.body.token}`)
+                .send({
+                    "title": "user with bearer",
+                    "url": "someURL",
+                    "author": "me",
+                    "likes": 5
+                })
+        await api
+                .put(`/api/blogs/${newBlog.body.id}`)
+                .set('authorization', `bearer ${user.body.token}`)
+                .send({title: "test title"})
+                .expect(204)
+    })
+    it('non-user cant update', async () => {
+        const user = await api
+                            .post('/api/login')
+                            .send(users[0])
+        const newBlog = await api
+                .post('/api/blogs')
+                .set('authorization', `bearer ${user.body.token}`)
+                .send({
+                    "title": "user with bearer",
+                    "url": "someURL",
+                    "author": "me",
+                    "likes": 5
+                })
+        await api
+                .put(`/api/blogs/${newBlog.body.id}`)
+                .send({title: "test title"})
+                .expect(401)
+    })
+    it('bad jwt cant update', async () => {
+        const user = await api
+                            .post('/api/login')
+                            .send(users[0])
+        const newBlog = await api
+                .post('/api/blogs')
+                .set('authorization', `bearer ${user.body.token}`)
+                .send({
+                    "title": "user with bearer",
+                    "url": "someURL",
+                    "author": "me",
+                    "likes": 5
+                })
+        await api
+                .put(`/api/blogs/${newBlog.body.id}`)
+                .set('authorization', 'bearer dasdsad')
+                .send({title: "test title"})
+                .expect(400)
     })
 })
 
