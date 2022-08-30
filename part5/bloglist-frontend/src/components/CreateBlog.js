@@ -6,7 +6,7 @@ const CreateBlog = props => {
                 title: <input /><br />
                 author: <input /><br />
                 url: <input /><br />
-                <button>create</button> 
+                <button>create</button>
             </form>
         </>
     )
