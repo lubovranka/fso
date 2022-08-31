@@ -3,10 +3,10 @@ const CreateBlog = props => {
         <>
             <h2>Create new</h2>
             <form onSubmit={(e) => props.handleNewBlog(e)}>
-                title: <input /><br />
-                author: <input /><br />
-                url: <input /><br />
-                <button>create</button>
+                title: <input id="titleInput"/><br />
+                author: <input id="authorInput"/><br />
+                url: <input id="urlInput"/><br />
+                <button id="createBtn">create</button>
             </form>
         </>
     )

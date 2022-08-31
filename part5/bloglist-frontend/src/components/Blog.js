@@ -17,10 +17,10 @@ const Blog = ({ blog, handleLike, handleDelete }) => {
     }
     return (
         <div style={blogStyle}>
-            {blog.title} {blog.author} <button onClick={toggleVisibility} >{visibility ? 'hide' : 'view'}</button>
-            <div style={{ display: visibility ? '' : 'none' }}>
+            <span id='header'>{blog.title} {blog.author}</span> <button onClick={toggleVisibility} id='toggler'>{visibility ? 'hide' : 'view'}</button>
+            <div style={{ display: visibility ? '' : 'none' }} id='desc'>
                 {blog.url}<br />
-          likes: {blog.likes} <button onClick={() => handleLike({ ...blog, likes: blog.likes + 1, user: blog.user[0].id })}>like</button>
+          likes: {blog.likes} <button onClick={() => handleLike({ ...blog, likes: blog.likes + 1, user: blog.user[0].id })} id='likeBtn'>like</button>
                 <button onClick={() => {if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`) === true) {handleDelete(blog)}}}>delete</button>
             </div>
         </div>
