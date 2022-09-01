@@ -125,9 +125,9 @@ const App = () => {
                 {error && <p className='error'>{error}</p>}
                 {message && <p className='success'>{message}</p>}
                 <form onSubmit={handleLogin}>
-          username<input name="username" type="text"/><br />
-          password<input name="password" type="password"/><br />
-                    <button type='submit'>login</button>
+          username<input name="username" type="text" id='usernameInput'/><br />
+          password<input name="password" type="password" id='passwordInput'/><br />
+                    <button type='submit' id='loginBtn'>login</button>
                 </form>
             </div>
         )
@@ -138,16 +138,18 @@ const App = () => {
             <h2>blogs</h2>
             {error && <p className='error'>{error}</p>}
             {message && <p className='success'>{message}</p>}
-            {user.name} logged in <button onClick={handleLogout}>logout</button>
+            {user.name} logged in <button onClick={handleLogout} id='logoutBtn'>logout</button>
             <br />
             <Toggleable ref={newBlogRef}>
                 <CreateBlog handleNewBlog={handleNewBlog} />
             </Toggleable>
             <br />
             <br />
-            {blogs.map(blog =>
-                <Blog key={blog.id} blog={blog} handleLike={handleLike} handleDelete={handleDelete}/>
-            )}
+            <div className='blogs'>
+                {blogs.map(blog =>
+                    <Blog key={blog.id} blog={blog} handleLike={handleLike} handleDelete={handleDelete}/>
+                )}
+            </div>
         </div>
     )
 }

@@ -14,7 +14,7 @@ const Toggleable = (props, refs) => {
             <div style={{ display: visibility ? '' : 'none' }}>
                 {props.children}
             </div>
-            <button onClick={toggleVisibility}>{visibility ? 'cancel' : 'new note'}</button>
+            <button onClick={toggleVisibility} id='toggleCreate'>{visibility ? 'cancel' : 'new note'}</button>
         </>
     )
 }

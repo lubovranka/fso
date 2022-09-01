@@ -24,6 +24,9 @@ module.exports = {
             'error',
             4
         ],
+        'globals': {
+            'cy' : true
+        },
         'linebreak-style': [
             'error',
             'windows'
