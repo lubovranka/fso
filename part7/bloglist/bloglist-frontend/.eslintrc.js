@@ -25,7 +25,8 @@ module.exports = {
             4
         ],
         'globals': {
-            'cy' : true
+            'cy' : true,
+            'severity': 0
         },
         'linebreak-style': [
             'error',
@@ -37,7 +38,7 @@ module.exports = {
         ],
         'semi': [
             'error',
-            'never'
+            'es5'
         ],
         'eqeqeq': 'error',
         'no-trailing-spaces': 'error',
