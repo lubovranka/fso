@@ -27,26 +27,30 @@ const BlogView = ({ handleLike }) => {
 
     return (
         <div>
-            <h1>{blog.title}</h1>
-            <p>{blog.url}</p>
-            <p>{blog.likes}</p>
-            <button
-                onClick={async () => {
-                    await handleLike({
-                        ...blog,
-                        likes: blog.likes + 1,
-                        user: blog.user.id,
-                    });
-                    blogService.getBlog(id).then((res) => setBlog(res[0]));
-                }}
-            >
-                like
-            </button>
-            <p>added by {blog.user[0].name}</p>
-            <form onSubmit={handleNewComment}>
-                <input type="text" name="comment" />
-                <button type="submit">add comment</button>
-            </form>
+            <h2>{blog.title}</h2>
+            <div className="main">
+                <a href={blog.url}>{blog.url}</a>
+                <div className="likeAction">
+                    <p>{blog.likes}</p>
+                    <button id='likeBtn'
+                        onClick={async () => {
+                            await handleLike({
+                                ...blog,
+                                likes: blog.likes + 1,
+                                user: blog.user.id,
+                            });
+                            blogService.getBlog(id).then((res) => setBlog(res[0]));
+                        }}
+                    >
+                        like
+                    </button>
+                </div>
+                <p>added by {blog.user[0].name}</p>
+                <form onSubmit={handleNewComment}>
+                    <input type="text" name="comment" />
+                    <button type="submit" id='commentBtn'>add comment</button>
+                </form>
+            </div>
             <h2>comments</h2>
             <ul>
                 {blog.comments.length ? (

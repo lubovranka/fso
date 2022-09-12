@@ -1,3 +1,148 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    font-family: 'Roboto', sans-serif;
+    background-color: #121212;
+    color: #ffffff;
+}
+
+#root {
+    width: 70%;
+}
+
+h1 {
+    font-weight: 700;
+    font-size: 3rem;
+    text-transform: capitalize;
+}
+
+h2 {
+    font-weight: 700;
+    font-size: 2rem;
+    text-transform: capitalize;
+    margin-bottom: 0.5em;
+}
+
+a {
+    color: #ffffff;
+}
+
+.nav {
+    margin-top: 1em;
+    margin-bottom: 2em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navLinks {
+    display: flex;
+    gap: 1em;
+}
+
+.navUser {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+}
+
+#logoutBtn {
+    background-color: transparent;
+    color: #ffffff;
+    font-size: 0.85rem;
+    text-transform: capitalize;
+    padding: 0.3em;
+    border-radius: 5px;
+    border: 1px dashed #ff4343;
+}
+
+.blog {
+    display: flex;
+    flex-direction: column;
+    padding: 1em 1.5em;
+    background-color: #171717;
+    border-bottom: 1px solid #303030;
+}
+
+.blogHeader {
+    display: flex;
+    justify-content: space-between;
+}
+
+.desc {
+    margin-top: 0.5em;
+}
+
+.blogInteraction {
+    display: flex;
+    gap: 1em;
+    margin-top: 0.5em;
+}
+
+button {
+    background-color: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 0.85rem;
+    text-transform: capitalize;
+    padding: 0.3em;
+    border-radius: 5px;
+}
+
+#likeBtn {
+    border: 1px solid #71ff5e;
+}
+
+#deleteBtn {
+    border: 1px dashed #ff4343;
+}
+
+.blog:nth-child(2n) {
+    background-color: #121212;
+}
+
+.descToggler {
+    background-color: transparent;
+    border: none;
+    color: #ffffff;
+}
+
+.likeAction {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+}
+
+#commentBtn {
+    border: 1px double rgb(137, 137, 255);
+    margin-left: 1em;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+ul {
+    list-style-position: inside;
+}
+
+tr:nth-child(2n) {
+    background-color: #303030;
+}
+
+td {
+    padding: 0.5em 1em;
+}
+
 .error {
     background-color: #d3d3d3;
     font-weight: bold;

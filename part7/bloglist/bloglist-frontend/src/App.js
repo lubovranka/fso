@@ -179,7 +179,7 @@ const App = () => {
     return (
         <div>
             <Navigation name={user.name} handleLogout={handleLogout}/>
-            <h2>blogs</h2>
+            <h1>blogs</h1>
             <br />
             <Routes>
                 <Route
