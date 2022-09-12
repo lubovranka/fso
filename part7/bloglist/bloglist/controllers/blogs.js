@@ -1,7 +1,7 @@
 const blogsRouter = require("express").Router();
 const Blog = require("../models/blog");
 const User = require("../models/user")
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 
 blogsRouter.get("/", async (request, response) => {
   const blogs = await Blog.find({}).populate('user')
@@ -42,7 +42,7 @@ blogsRouter.post("/", async (request, response) => {
 blogsRouter.put('/:id', async (request, response) => {
   const id = request.params.id
   const body = request.body
-
+  console.log('ran  ')
   const token = request.token
   
   if (!token) {
@@ -51,7 +51,11 @@ blogsRouter.put('/:id', async (request, response) => {
   const decodedToken = jwt.verify(token, process.env.SECRET)
 
   const oldBlog = await Blog.findById(id)
-  const updatedBlog = {...oldBlog._doc, ...body}
+  let updatedBlog = {...oldBlog._doc, ...body}
+
+  if (body.comment) {
+    updatedBlog = {...updatedBlog, comments: [...updatedBlog.comments, body.comment]}
+  }
  
   if (oldBlog.user[0].toString() === decodedToken.id) {
     await Blog.findByIdAndUpdate(id, updatedBlog)
