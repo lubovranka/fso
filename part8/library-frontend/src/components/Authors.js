@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { ALL_AUTHORS, UPDATE_AUTHOR } from '../queries';
 
 const Authors = (props) => {
-    const [selectedAuthor, setSelectedAuthor] = useState('');
     const authors = useQuery(ALL_AUTHORS);
+    const [selectedAuthor, setSelectedAuthor] = useState('');
     const [updateAuthor] = useMutation(UPDATE_AUTHOR, {
         refetchQueries: [{ query: ALL_AUTHORS }],
     });
@@ -53,6 +53,7 @@ const Authors = (props) => {
             <h2>set birthyear</h2>
             <form onSubmit={handleAuthorUpdate}>
                 <select value={selectedAuthor} onChange={handleSelectChange}>
+                        <option value='' disabled>select author</option>
                     {authors.data.allAuthors.map((a) => (
                         <option key={a.name} value={a.name}>
                             {a.name}

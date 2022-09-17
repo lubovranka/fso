@@ -12,17 +12,27 @@ const resolvers = {
         allBooks: async (root, args) => {
             if (args.author) {
                 const author = await Author.find({ name: args.author });
-                return await Book.find({ author: author });
+                return await Book.find({ author: author }).populate('author');
             }
 
             if (args.genre) {
-                return Book.find({ genres: args.genre });
+                return Book.find({ genres: args.genre }).populate('author');
             }
 
-            return Book.find({});
+            return await Book.find({}).populate('author');
         },
         allAuthors: async () => Author.find({}),
         me: (root, args, context) => context.currentUser,
+        allGenres: async () => {
+            const books = await Book.find({});
+            const genres = new Set(
+                books.flatMap((book) => {
+                    return book.genres;
+                })
+            );
+
+            return genres
+        },
     },
     Author: {
         bookCount: async (root) => {
@@ -33,33 +43,34 @@ const resolvers = {
     Mutation: {
         addBook: async (root, args, context) => {
             if (!context.currentUser) {
-                throw new Error('Invalid user')
+                throw new Error('Invalid user');
             }
 
             let book;
             const author = await Author.findOne({ name: args.author });
             if (!author) {
-                const newAuthor = new Author({
+                const author = new Author({
                     name: args.author,
                     id: uuidv4(),
                 });
-                await newAuthor.save();
-                book = new Book({ ...args, id: uuidv4(), author: newAuthor });
+                const newAuthor = await author.save();
+                console.log(newAuthor.id)
+                book = new Book({ ...args, id: uuidv4(), author: newAuthor.id });
+            } else {
+                book = new Book({ ...args, id: uuidv4(), author: author });
             }
-            book = new Book({ ...args, id: uuidv4(), author: author });
             try {
-                await book.save();
+                const savedBook = await book.save();
+                return savedBook
             } catch (e) {
                 throw new UserInputError(e.message, {
                     invalidArgs: args,
                 });
-            }
-
-            return book;
+            };
         },
         editAuthor: async (root, args, context) => {
             if (!context.currentUser) {
-                throw new Error('Invalid user')
+                throw new Error('Invalid user');
             }
 
             const updatedAuthor = await Author.findOneAndUpdate(

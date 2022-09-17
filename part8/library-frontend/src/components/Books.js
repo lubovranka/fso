@@ -1,9 +1,21 @@
-import { ALL_BOOKS } from "../queries"
-import { useQuery } from '@apollo/client'
+import { ALL_BOOKS, ALL_GENRES } from "../queries"
+import { useApolloClient, useQuery } from '@apollo/client'
+import { useState } from "react"
 
 const Books = (props) => {
-  const books = useQuery(ALL_BOOKS)
-
+  const client = useApolloClient()
+  const [filter, setFilter] = useState('')
+  const books = useQuery(ALL_BOOKS, {
+    variables: {
+      genre: filter
+    }
+  })
+  console.log(books)
+  const genres = useQuery(ALL_GENRES)
+  client.refetchQueries({
+    include: 'all'
+  })
+  
   if (!props.show) {
     return null
   }
@@ -15,7 +27,7 @@ const Books = (props) => {
   return (
     <div>
       <h2>books</h2>
-
+      <p>in {filter ? `genre ${filter}` : 'all genres'}</p>
       <table>
         <tbody>
           <tr>
@@ -26,12 +38,16 @@ const Books = (props) => {
           {books.data.allBooks.map((a) => (
             <tr key={a.title}>
               <td>{a.title}</td>
-              <td>{a.author}</td>
+              <td>{a.author.name}</td>
               <td>{a.published}</td>
             </tr>
           ))}
         </tbody>
       </table>
+      {genres.data.allGenres.map(genre => (
+        <button onClick={() => setFilter(genre)} key={genre}>{genre}</button>
+      ))}
+      <button onClick={() => setFilter('')}>all genres</button>
     </div>
   )
 }
