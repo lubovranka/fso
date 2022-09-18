@@ -1,10 +1,19 @@
-import { ApolloServer } from 'apollo-server';
 import typeDefs from './graphql/typedefs.js';
 import resolvers from './graphql/resolvers.js';
-import * as dotenv from 'dotenv';
-import mongoose from 'mongoose';
-import jwt from 'jsonwebtoken';
 import User from './models/user.js';
+import DataLoader from 'dataloader'
+
+import * as dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
+
+import express from 'express';
+import http from 'http';
+import mongoose from 'mongoose';
+import { ApolloServer } from 'apollo-server-express';
+import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { SubscriptionServer } from 'subscriptions-transport-ws';
+import { execute, subscribe } from 'graphql';
 
 dotenv.config();
 
@@ -15,26 +24,69 @@ try {
     console.log('connection error: ', e);
 }
 
-const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-    context: async ({ req }) => {
-        const auth = req ? req.headers.authorization : null;
-        if (auth && auth.toLowerCase().startsWith('bearer ')) {
-            try {
+mongoose.set('debug', true);
+
+const start = async () => {
+    const app = express();
+    const httpServer = http.createServer(app);
+
+    const schema = makeExecutableSchema({ typeDefs, resolvers });
+
+    const subscriptionServer = SubscriptionServer.create(
+        {
+            schema,
+            execute,
+            subscribe,
+        },
+        {
+            server: httpServer,
+            path: '',
+        }
+    );
+
+    const server = new ApolloServer({
+        schema,
+        context: async ({ req }) => {
+            let currentUser
+            const auth = req ? req.headers.authorization : null;
+            if (auth && auth.startsWith('bearer ')) {
                 const decodedToken = jwt.verify(
                     auth.substring(7),
                     process.env.JWT_SECRET
                 );
-                const currentUser = await User.findById(decodedToken.id);
-                return { currentUser };
-            } catch (e) {
-                return { currentUser: null };
+                currentUser = await User.findById(decodedToken.id);
             }
-        }
-    },
-});
+            const bookLoader = new DataLoader(async keys => {
+                console.log(keys)
+            })
+            return { currentUser, bookLoader };
+        },
+        plugins: [
+            ApolloServerPluginDrainHttpServer({ httpServer }),
+            {
+                async serverWillStart() {
+                    return {
+                        async drainServer() {
+                            subscriptionServer.close();
+                        },
+                    };
+                },
+            },
+        ],
+    });
 
-server.listen().then(({ url }) => {
-    console.log(`Server ready at ${url}`);
-});
+    await server.start();
+
+    server.applyMiddleware({
+        app,
+        path: '/',
+    });
+
+    const PORT = 4000;
+
+    httpServer.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+};
+
+start();

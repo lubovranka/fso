@@ -10,7 +10,6 @@ const Books = (props) => {
       genre: filter
     }
   })
-  console.log(books)
   const genres = useQuery(ALL_GENRES)
   client.refetchQueries({
     include: 'all'

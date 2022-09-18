@@ -46,6 +46,10 @@ const typeDefs = gql`
         createUser(username: String!, favouriteGenre: String!): User
         login(username: String!, password: String!): Token
     }
+
+    type Subscription {
+        bookAdded: Book!
+    }
 `;
 
 export default typeDefs;

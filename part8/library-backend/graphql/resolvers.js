@@ -4,6 +4,9 @@ import Author from '../models/author.js';
 import User from '../models/user.js';
 import { UserInputError } from 'apollo-server';
 import jwt from 'jsonwebtoken';
+import { PubSub } from 'graphql-subscriptions'
+
+const pubsub = new PubSub()
 
 const resolvers = {
     Query: {
@@ -54,13 +57,13 @@ const resolvers = {
                     id: uuidv4(),
                 });
                 const newAuthor = await author.save();
-                console.log(newAuthor.id)
                 book = new Book({ ...args, id: uuidv4(), author: newAuthor.id });
             } else {
                 book = new Book({ ...args, id: uuidv4(), author: author });
             }
             try {
                 const savedBook = await book.save();
+                pubsub.publish('BOOK_ADDED', {bookAdded: book})
                 return savedBook
             } catch (e) {
                 throw new UserInputError(e.message, {
@@ -106,6 +109,11 @@ const resolvers = {
             return { token: jwt.sign(userForToken, process.env.JWT_SECRET) };
         },
     },
+    Subscription: {
+        bookAdded: {
+            subscribe: () => pubsub.asyncIterator(['BOOK_ADDED'])
+        }
+    }
 };
 
 export default resolvers;
